@@ -1,0 +1,73 @@
+.calculator-container {
+  width: 50%;
+  margin: 0 auto;
+}
+
+.display-container {
+  background-color: #232b2b;
+  margin-bottom: 15px;
+}
+
+.display-field {
+  width: 99%;
+  font-size: 4em;
+  border: 0;
+  border-radius: 5px;
+  text-align: right;
+  background-color: #232b2b;
+  color: whitesmoke;
+}
+
+.display-field:focus {
+  outline: none;
+}
+
+.button,
+.display-field {
+  cursor: default;
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none; /* Safari */
+  -khtml-user-select: none; /* Konqueror HTML */
+  -moz-user-select: none; /* Old versions of Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+  user-select: none; /* Non-prefixed version, currently supported by Chrome, Edge, Opera and Firefox */
+}
+
+.button-container {
+  height: 4em;
+  width: 4em;
+}
+
+.button {
+  height: 100%;
+  width: 100%;
+  border-radius: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+	-moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased;
+}
+
+.clear,
+.all-clear,
+.sign {
+  background-color: #d4d4d4;
+	color: #232b2b;
+}
+
+.number,
+.decimal {
+  background-color: #494848;
+  color: whitesmoke;
+}
+
+.operator {
+  background-color: #ff9a00;
+  color: whitesmoke;
+}
+
+.button-row td {
+  padding: 5px;
+}
