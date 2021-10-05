@@ -1,6 +1,7 @@
 .calculator-container {
-  width: 50%;
-  margin: 0 auto;
+  width: 20%;
+  margin: 100px auto;
+  background-color: #232b2b;
 }
 
 .display-container {
@@ -36,6 +37,7 @@
 .button-container {
   height: 4em;
   width: 4em;
+  background-color: #232b2b;
 }
 
 .button {
@@ -46,7 +48,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-	-moz-osx-font-smoothing: grayscale;
+  -moz-osx-font-smoothing: grayscale;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -54,7 +56,7 @@
 .all-clear,
 .sign {
   background-color: #d4d4d4;
-	color: #232b2b;
+  color: #232b2b;
 }
 
 .number,
@@ -68,6 +70,21 @@
   color: whitesmoke;
 }
 
+table {
+  background-color: #232b2b;
+}
+
 .button-row td {
   padding: 5px;
+  text-align: center;
+  background-color: #232b2b;
+}
+
+.zero-cell {
+  width: 100%;
+}
+
+.zero-cell .button {
+  border-radius: 500px;
+  text-align: left;
 }

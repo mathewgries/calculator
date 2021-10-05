@@ -1,19 +1,14 @@
 import React from "react";
+import runOperations from "../../helpers/runOperations";
 import { useDispatch, useSelector } from "react-redux";
 import {
   resetAll,
-  updateOperations,
+  updateActions,
   updateValues,
-  updateDisableOperator,
-  updateOperationQueued,
+  updateOperations,
+  selectActions,
   selectValues,
-  selectCurrentValue,
-  selectLastValue,
   selectOperations,
-  selectCurrentOperation,
-  selectLastOperation,
-  selectDisableOperator,
-  selectOperationQueued,
 } from "./calculatorSlice";
 import { DisplayField } from "./DisplayField";
 import { CalculatorButton } from "./CalculatorButton";
@@ -21,47 +16,78 @@ import "./style.css";
 
 export const CalculatorPage = () => {
   const dispatch = useDispatch();
+
+  const actions = useSelector(selectActions);
   const values = useSelector(selectValues);
-  const currentValue = useSelector(selectCurrentValue);
-  const lastValue = useSelector(selectLastValue);
   const operations = useSelector(selectOperations);
-  const currentOperation = useSelector(selectCurrentOperation);
-  const lastOperation = useSelector(selectLastOperation);
-  const operationQueued = useSelector(selectOperationQueued);
-  const disableOperator = useSelector(selectDisableOperator);
-  const disableNumbers = currentValue.length === 8;
+  const disableNumbers = values.current.length === 8;
 
   const onClickHandler = ({ target }) => {
     const { id, classList } = target;
     const btn = classList.value.substring("button".length + 1);
 
     if (btn === "number") handleNumberClick(id);
-    if (btn === "operator") handleOperatorClick(id);
     if (btn === "sign") handleSignClick(id);
     if (btn === "all-clear") handleAllClearClick();
     if (btn === "clear") handleClearClick();
     if (btn === "decimal") handleDecimalClick();
-  };
 
-  const handleNumberClick = (number) => {
-    console.log(currentValue);
-    if (currentValue === "0" || operationQueued) {
-      dispatch(updateValues(number));
-      dispatch(updateDisableOperator());
-      if (operationQueued) {
-        dispatch(updateOperationQueued());
+    if (btn === "operator") {
+      if (id === "equal") {
+        handleEqualsClick();
+      } else {
+        handleOperatorClick(id);
       }
-    } else {
-      dispatch(updateValues(`${currentValue}${number}`));
     }
   };
 
-  const handleOperatorClick = (operator) => {
-    dispatch(updateOperations(operator));
-    dispatch(updateOperationQueued());
+  const handleActionUpdates = (current, type) => {
+    dispatch(updateActions({ last: current, current: type }));
   };
 
+  const handleNumberClick = (number) => {
+    let current;
+    let last;
+    if (actions.current !== "number") {
+      current = number;
+      last = values.current;
+      handleActionUpdates(actions.current, "number");
+    } else {
+      current = `${values.current}${number}`;
+      last = values.last;
+    }
+    dispatch(updateValues({ last, current }));
+  };
+
+  const handleOperatorClick = (operator) => {
+    if (actions.current) {
+      if (actions.current !== "operator") {
+        handleActionUpdates(actions.current, "operator");
+        dispatch(
+          updateOperations({ last: operations.current, current: operator })
+        );
+        dispatch(
+          updateValues({ last: values.current, current: values.current })
+        );
+      }
+
+      if (actions.current === "operator" && operations.current !== operator) {
+        dispatch(
+          updateOperations({ last: operations.last, current: operator })
+        );
+      }
+
+      if (actions.current === "operator" && actions.last === "number") {
+				
+      }
+    }
+  };
+
+  const handleEqualsClick = () => {};
+
   const handleSignClick = (sign) => {};
+
+  const handleDecimalClick = () => {};
 
   const handleAllClearClick = () => {
     dispatch(resetAll());
@@ -69,15 +95,13 @@ export const CalculatorPage = () => {
 
   const handleClearClick = () => {};
 
-  const handleDecimalClick = () => {};
-
   return (
     <section className="calculator-container">
       <table>
         <tbody>
           <tr>
             <td colSpan="4">
-              <DisplayField value={currentValue} />
+              <DisplayField value={values.current} />
             </td>
           </tr>
           <tr className="button-row">
@@ -110,7 +134,6 @@ export const CalculatorPage = () => {
                 text={"\u00F7"}
                 id={"divide"}
                 className={"operator"}
-                disabled={disableOperator}
                 onClickHandler={onClickHandler}
               />
             </td>
@@ -148,7 +171,6 @@ export const CalculatorPage = () => {
                 text={"x"}
                 id={"multiply"}
                 className={"operator"}
-                disabled={disableOperator}
                 onClickHandler={onClickHandler}
               />
             </td>
@@ -184,9 +206,8 @@ export const CalculatorPage = () => {
             <td>
               <CalculatorButton
                 text={"-"}
-                id={"minus"}
+                id={"subtract"}
                 className={"operator"}
-                disabled={disableOperator}
                 onClickHandler={onClickHandler}
               />
             </td>
@@ -224,20 +245,17 @@ export const CalculatorPage = () => {
                 text={"+"}
                 id={"add"}
                 className={"operator"}
-                disabled={disableOperator}
                 onClickHandler={onClickHandler}
               />
             </td>
           </tr>
           <tr className="button-row">
-            <td>
-              <span></span>
-            </td>
-            <td>
+            <td colSpan="2">
               <CalculatorButton
                 text={"0"}
                 id={"0"}
                 className={"number"}
+                wrapperClass={"zero-cell"}
                 disabled={disableNumbers}
                 onClickHandler={onClickHandler}
               />
@@ -256,7 +274,6 @@ export const CalculatorPage = () => {
                 text={"="}
                 id={"equal"}
                 className={"operator"}
-                disabled={disableOperator}
                 onClickHandler={onClickHandler}
               />
             </td>

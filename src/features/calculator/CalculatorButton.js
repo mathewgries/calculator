@@ -9,7 +9,7 @@ export const CalculatorButton = (props) => {
     
   };
   return (
-    <div className="button-container">
+    <div className={`button-container ${props.wrapperClass ? props.wrapperClass : ''}`}>
       <div
         id={props.id}
         className={`button ${props.className}`}

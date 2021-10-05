@@ -1,6 +1,10 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
+  actions: {
+    last: null,
+    current: null,
+  },
   operations: {
     last: null,
     current: null,
@@ -9,8 +13,6 @@ const initialState = {
     last: null,
     current: "0",
   },
-  disableOperator: true,
-  operationQueued: false,
 };
 
 const calculatorSlice = createSlice({
@@ -18,48 +20,37 @@ const calculatorSlice = createSlice({
   initialState,
   reducers: {
     resetAll(state) {
+      state.actions = { last: null, current: null };
       state.operations = { last: null, current: null };
       state.values = { last: null, current: "0" };
-      state.disableOperator = true;
-      state.operationQueued = false;
+    },
+    updateActions(state, action) {
+      const { last, current } = action.payload;
+      state.actions.last = last;
+      state.actions.current = current;
     },
     updateValues(state, action) {
-      state.values.current = action.payload;
+      const { current, last } = action.payload;
+      state.values.current = current;
+      state.values.last = last;
     },
     updateOperations(state, action) {
-      state.values.last = state.values.current;
-      state.operations.last = state.operations.current;
-      state.operations.current = action.payload;
-    },
-    updateDisableOperator(state, action) {
-      state.disableOperator = !state.disableOperator;
-    },
-    updateOperationQueued(state) {
-      state.operationQueued = !state.operationQueued;
+      const { current, last } = action.payload;
+      state.operations.current = current;
+      state.operations.last = last;
     },
   },
 });
 
 export const {
   resetAll,
+  updateActions,
   updateValues,
   updateOperations,
-  updateDisableOperator,
-  updateOperationQueued,
 } = calculatorSlice.actions;
 
 export default calculatorSlice.reducer;
 
-export const selectDisableOperator = (state) =>
-  state.calculator.disableOperator;
-export const selectOperationQueued = (state) =>
-  state.calculator.operationQueued;
-
+export const selectActions = (state) => state.calculator.actions;
 export const selectValues = (state) => state.calculator.values;
-export const selectCurrentValue = (state) => state.calculator.values.current;
-export const selectLastValue = (state) => state.calculator.values.last;
-
 export const selectOperations = (state) => state.calculator.operations;
-export const selectCurrentOperation = (state) =>
-  state.calculator.operations.current;
-export const selectLastOperation = (state) => state.calculator.operations.last;
