@@ -2,16 +2,21 @@ import React from "react";
 import runOperations from "../../helpers/runOperations";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  resetAll,
-  updateLastKey,
-  updateDisplayValue,
+  updateQueuedOperation,
+  updateLastAction,
   updateFirstValue,
   updateSecondValue,
-  updateOperation,
+  updateDisplayValue,
+  clearLast,
+  resetAll,
 } from "./calculatorSlice";
 import { DisplayField } from "./DisplayField";
 import { CalculatorButton } from "./CalculatorButton";
 import "./style.css";
+
+// TODO:
+// Handle decimal calculations
+// Handle active button highlighting
 
 export const CalculatorPage = () => {
   const dispatch = useDispatch();
@@ -20,11 +25,13 @@ export const CalculatorPage = () => {
     operator: "operator",
     equals: "equals",
   };
-  const lastKey = useSelector((state) => state.calculator.lastKey);
-  const displayValue = useSelector((state) => state.calculator.displayValue);
+  const lastAction = useSelector((state) => state.calculator.lastAction);
   const firstValue = useSelector((state) => state.calculator.firstValue);
   const secondValue = useSelector((state) => state.calculator.secondValue);
-  const operation = useSelector((state) => state.calculator.operation);
+  const displayValue = useSelector((state) => state.calculator.displayValue);
+  const queuedOperation = useSelector(
+    (state) => state.calculator.queuedOperation
+  );
 
   const disableNumbers = displayValue.length === 8;
 
@@ -54,23 +61,29 @@ export const CalculatorPage = () => {
   const handleNumberClick = (number) => {
     let nextValue;
 
-    if (displayValue === "0" || lastKey !== actionsList.number) {
+    if (displayValue === "0") {
       if (number === "0") {
         return;
       }
       nextValue = number;
-    } else if (displayValue.includes(".")) {
-      if (displayValue.length - displayValue.indexOf(".") <= 3) {
-        nextValue = `${displayValue}${number}`;
-      } else {
+    } else if (lastAction === actionsList.equals) {
+      nextValue = number;
+      dispatch(resetAll());
+    } else if (lastAction === actionsList.operator) {
+      nextValue = number;
+      dispatch(updateFirstValue(displayValue));
+    } else {
+      if (
+        displayValue.includes(".") &&
+        displayValue.length - displayValue.indexOf(".") === 3
+      ) {
         return;
       }
-    } else {
       nextValue = `${displayValue}${number}`;
     }
 
-    if (lastKey !== actionsList.number) {
-      dispatch(updateLastKey(actionsList.number));
+    if (lastAction !== actionsList.number) {
+      dispatch(updateLastAction(actionsList.number));
     }
     dispatch(updateDisplayValue(nextValue));
   };
@@ -78,18 +91,36 @@ export const CalculatorPage = () => {
   //==========================================================================//
 
   const handleOperatorClick = (operator) => {
-    if (lastKey) {
-			if(lastKey === actionsList.operator){
-				if(operator === operator){
-					return
-				}else{
-					dispatch(updateOperation(operator))
-					return
-				}
-			}
-      dispatch(updateLastKey(actionsList.operator));
-      dispatch(updateOperation(operator));
-      dispatch(updateFirstValue(displayValue));
+    if (lastAction) {
+      if (lastAction === actionsList.operator) {
+        if (queuedOperation === operator) {
+          return;
+        } else {
+          dispatch(updateQueuedOperation(operator));
+          return;
+        }
+      }
+
+      if (lastAction === actionsList.equals) {
+        dispatch(updateFirstValue(displayValue));
+      }
+
+      if (lastAction === actionsList.number) {
+        if (!queuedOperation) {
+          dispatch(updateFirstValue(displayValue));
+        } else {
+          const result = runOperations(
+            queuedOperation,
+            firstValue,
+            displayValue
+          );
+          dispatch(updateDisplayValue(result));
+        }
+      }
+      if (queuedOperation !== operator) {
+        dispatch(updateQueuedOperation(operator));
+      }
+      dispatch(updateLastAction(actionsList.operator));
     }
   };
 
@@ -98,16 +129,16 @@ export const CalculatorPage = () => {
   const handleEqualsClick = () => {
     let result;
 
-    if (lastKey && operation) {
-      if (lastKey !== actionsList.equals) {
+    if (lastAction && queuedOperation) {
+      if (lastAction !== actionsList.equals) {
         dispatch(updateSecondValue(displayValue));
-        result = runOperations(operation, firstValue, displayValue);
+        result = runOperations(queuedOperation, firstValue, displayValue);
       } else {
-        result = runOperations(operation, displayValue, secondValue);
+        result = runOperations(queuedOperation, displayValue, secondValue);
       }
 
-      if (lastKey !== actionsList.equals) {
-        dispatch(updateLastKey(actionsList.equals));
+      if (lastAction !== actionsList.equals) {
+        dispatch(updateLastAction(actionsList.equals));
       }
 
       dispatch(updateDisplayValue(result));
@@ -124,19 +155,25 @@ export const CalculatorPage = () => {
     if (!displayValue.includes(".")) {
       const result = `${displayValue}.`;
       dispatch(updateDisplayValue(result));
-      dispatch(updateLastKey(actionsList.number));
+      dispatch(updateLastAction(actionsList.number));
+    }
+  };
+
+  //==========================================================================//
+
+  const handleClearClick = () => {
+    if (lastAction === actionsList.number) {
+      dispatch(updateDisplayValue("0"));
     }
   };
 
   //==========================================================================//
 
   const handleAllClearClick = () => {
-    dispatch(resetAll());
+    if (lastAction) {
+      dispatch(resetAll());
+    }
   };
-
-  //==========================================================================//
-
-  const handleClearClick = () => {};
 
   //==========================================================================//
 
@@ -186,8 +223,8 @@ export const CalculatorPage = () => {
           <tr className="button-row">
             <td>
               <CalculatorButton
-                text={"9"}
-                id={"9"}
+                text={"7"}
+                id={"7"}
                 className={"number"}
                 disabled={disableNumbers}
                 onClickHandler={onClickHandler}
@@ -204,8 +241,8 @@ export const CalculatorPage = () => {
             </td>
             <td>
               <CalculatorButton
-                text={"7"}
-                id={"7"}
+                text={"9"}
+                id={"9"}
                 className={"number"}
                 disabled={disableNumbers}
                 onClickHandler={onClickHandler}
@@ -223,8 +260,8 @@ export const CalculatorPage = () => {
           <tr className="button-row">
             <td>
               <CalculatorButton
-                text={"6"}
-                id={"6"}
+                text={"4"}
+                id={"4"}
                 className={"number"}
                 disabled={disableNumbers}
                 onClickHandler={onClickHandler}
@@ -241,8 +278,8 @@ export const CalculatorPage = () => {
             </td>
             <td>
               <CalculatorButton
-                text={"4"}
-                id={"4"}
+                text={"6"}
+                id={"6"}
                 className={"number"}
                 disabled={disableNumbers}
                 onClickHandler={onClickHandler}
@@ -260,8 +297,8 @@ export const CalculatorPage = () => {
           <tr className="button-row">
             <td>
               <CalculatorButton
-                text={"3"}
-                id={"3"}
+                text={"1"}
+                id={"1"}
                 className={"number"}
                 disabled={disableNumbers}
                 onClickHandler={onClickHandler}
@@ -278,8 +315,8 @@ export const CalculatorPage = () => {
             </td>
             <td>
               <CalculatorButton
-                text={"1"}
-                id={"1"}
+                text={"3"}
+                id={"3"}
                 className={"number"}
                 disabled={disableNumbers}
                 onClickHandler={onClickHandler}

@@ -1,8 +1,8 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-  operation: null,
-  lastKey: null,
+  queuedOperation: null,
+  lastAction: null,
   firstValue: "0",
   secondValue: "0",
   displayValue: "0",
@@ -12,38 +12,40 @@ const calculatorSlice = createSlice({
   name: "calculator",
   initialState,
   reducers: {
-    resetAll(state) {
-			state.operation = null
-			state.lastKey = null
-			state.firstValue = "0"
-			state.secondValue = "0"
-			state.displayValue = "0"
+    updateQueuedOperation(state, action) {
+      state.queuedOperation = action.payload;
     },
-		updateLastKey(state, action){
-			state.lastKey = action.payload
-		},
-		updateDisplayValue(state, action){
-			state.displayValue = action.payload
-		},
-		updateFirstValue(state, action){
-			state.firstValue = action.payload
-		},
-		updateSecondValue(state, action){
-			state.secondValue = action.payload
-		},
-		updateOperation(state, action){
-			state.operation = action.payload
-		},
+    updateLastAction(state, action) {
+      state.lastAction = action.payload;
+    },
+    updateFirstValue(state, action) {
+      state.firstValue = action.payload;
+    },
+    updateSecondValue(state, action) {
+      state.secondValue = action.payload;
+    },
+    updateDisplayValue(state, action) {
+      state.displayValue = action.payload;
+    },
+    clearLast(state, action) {},
+    resetAll(state) {
+      state.queuedOperation = null;
+      state.lastAction = null;
+      state.firstValue = "0";
+      state.secondValue = "0";
+      state.displayValue = "0";
+    },
   },
 });
 
 export const {
+  updateQueuedOperation,
+  updateLastAction,
+  updateFirstValue,
+  updateSecondValue,
+  updateDisplayValue,
+  clearLast,
   resetAll,
-	updateLastKey,
-	updateDisplayValue,
-	updateFirstValue,
-	updateSecondValue,
-	updateOperation
 } = calculatorSlice.actions;
 
 export default calculatorSlice.reducer;
