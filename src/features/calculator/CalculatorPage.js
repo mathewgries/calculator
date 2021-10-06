@@ -3,12 +3,11 @@ import runOperations from "../../helpers/runOperations";
 import { useDispatch, useSelector } from "react-redux";
 import {
   resetAll,
-  updateActions,
-  updateValues,
-  updateOperations,
-  selectActions,
-  selectValues,
-  selectOperations,
+  updateLastKey,
+  updateDisplayValue,
+  updateFirstValue,
+  updateSecondValue,
+  updateOperation,
 } from "./calculatorSlice";
 import { DisplayField } from "./DisplayField";
 import { CalculatorButton } from "./CalculatorButton";
@@ -16,11 +15,20 @@ import "./style.css";
 
 export const CalculatorPage = () => {
   const dispatch = useDispatch();
+  const actionsList = {
+    number: "number",
+    operator: "operator",
+    equals: "equals",
+  };
+  const lastKey = useSelector((state) => state.calculator.lastKey);
+  const displayValue = useSelector((state) => state.calculator.displayValue);
+  const firstValue = useSelector((state) => state.calculator.firstValue);
+  const secondValue = useSelector((state) => state.calculator.secondValue);
+  const operation = useSelector((state) => state.calculator.operation);
 
-  const actions = useSelector(selectActions);
-  const values = useSelector(selectValues);
-  const operations = useSelector(selectOperations);
-  const disableNumbers = values.current.length === 8;
+  const disableNumbers = displayValue.length === 8;
+
+  //==========================================================================//
 
   const onClickHandler = ({ target }) => {
     const { id, classList } = target;
@@ -41,59 +49,96 @@ export const CalculatorPage = () => {
     }
   };
 
-  const handleActionUpdates = (current, type) => {
-    dispatch(updateActions({ last: current, current: type }));
-  };
+  //==========================================================================//
 
   const handleNumberClick = (number) => {
-    let current;
-    let last;
-    if (actions.current !== "number") {
-      current = number;
-      last = values.current;
-      handleActionUpdates(actions.current, "number");
+    let nextValue;
+
+    if (displayValue === "0" || lastKey !== actionsList.number) {
+      if (number === "0") {
+        return;
+      }
+      nextValue = number;
+    } else if (displayValue.includes(".")) {
+      if (displayValue.length - displayValue.indexOf(".") <= 3) {
+        nextValue = `${displayValue}${number}`;
+      } else {
+        return;
+      }
     } else {
-      current = `${values.current}${number}`;
-      last = values.last;
+      nextValue = `${displayValue}${number}`;
     }
-    dispatch(updateValues({ last, current }));
+
+    if (lastKey !== actionsList.number) {
+      dispatch(updateLastKey(actionsList.number));
+    }
+    dispatch(updateDisplayValue(nextValue));
   };
+
+  //==========================================================================//
 
   const handleOperatorClick = (operator) => {
-    if (actions.current) {
-      if (actions.current !== "operator") {
-        handleActionUpdates(actions.current, "operator");
-        dispatch(
-          updateOperations({ last: operations.current, current: operator })
-        );
-        dispatch(
-          updateValues({ last: values.current, current: values.current })
-        );
-      }
-
-      if (actions.current === "operator" && operations.current !== operator) {
-        dispatch(
-          updateOperations({ last: operations.last, current: operator })
-        );
-      }
-
-      if (actions.current === "operator" && actions.last === "number") {
-				
-      }
+    if (lastKey) {
+			if(lastKey === actionsList.operator){
+				if(operator === operator){
+					return
+				}else{
+					dispatch(updateOperation(operator))
+					return
+				}
+			}
+      dispatch(updateLastKey(actionsList.operator));
+      dispatch(updateOperation(operator));
+      dispatch(updateFirstValue(displayValue));
     }
   };
 
-  const handleEqualsClick = () => {};
+  //==========================================================================//
+
+  const handleEqualsClick = () => {
+    let result;
+
+    if (lastKey && operation) {
+      if (lastKey !== actionsList.equals) {
+        dispatch(updateSecondValue(displayValue));
+        result = runOperations(operation, firstValue, displayValue);
+      } else {
+        result = runOperations(operation, displayValue, secondValue);
+      }
+
+      if (lastKey !== actionsList.equals) {
+        dispatch(updateLastKey(actionsList.equals));
+      }
+
+      dispatch(updateDisplayValue(result));
+    }
+  };
+
+  //==========================================================================//
 
   const handleSignClick = (sign) => {};
 
-  const handleDecimalClick = () => {};
+  //==========================================================================//
+
+  const handleDecimalClick = () => {
+    if (!displayValue.includes(".")) {
+      const result = `${displayValue}.`;
+      dispatch(updateDisplayValue(result));
+      dispatch(updateLastKey(actionsList.number));
+    }
+  };
+
+  //==========================================================================//
 
   const handleAllClearClick = () => {
     dispatch(resetAll());
   };
 
+  //==========================================================================//
+
   const handleClearClick = () => {};
+
+  //==========================================================================//
 
   return (
     <section className="calculator-container">
@@ -101,7 +146,7 @@ export const CalculatorPage = () => {
         <tbody>
           <tr>
             <td colSpan="4">
-              <DisplayField value={values.current} />
+              <DisplayField value={displayValue} />
             </td>
           </tr>
           <tr className="button-row">

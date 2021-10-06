@@ -41,5 +41,5 @@ export default function runOperations(operator, a, b) {
       alert("Something went wrong!");
       return;
   }
-  return result;
+  return result.toFixed(0);
 }
