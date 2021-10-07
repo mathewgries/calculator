@@ -150,10 +150,21 @@ export const CalculatorPage = () => {
   //==========================================================================//
 
   const handleDecimalClick = () => {
-    if (!displayValue.includes(".")) {
-      const result = `${displayValue}.`;
+    let result;
+    if (lastAction === actionsList.equals) {
+      result = "0.";
+      dispatch(resetAll());
+    } else if (lastAction === actionsList.operator) {
+      result = "0.";
+    } else if (!displayValue.includes(".")) {
+      result = `${displayValue}.`;
+    }
+
+    if (result) {
       dispatch(updateDisplayValue(result));
-      dispatch(updateLastAction(actionsList.number));
+      if (lastAction !== actionsList.number) {
+        dispatch(updateLastAction(actionsList.number));
+      }
     }
   };
 

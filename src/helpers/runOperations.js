@@ -65,6 +65,8 @@ function divide(a, b) {
 //========================================================================//
 
 function getUlps(a, b) {
+	// Get the units in the last place. Returns the length for the longer of the two
+	// Only used for adding and subtracting
   const num1 = a.indexOf(".") > -1 ? a.length - a.indexOf(".") - 1 : 0;
   const num2 = b.indexOf(".") > -1 ? b.length - b.indexOf(".") - 1 : 0;
   return num1 >= num2 ? num1 : num2;
@@ -74,8 +76,12 @@ function getUlps(a, b) {
 
 function convertToInt(str, p) {
   let num = parseFloat(str);
+	// If decimals, get places.
   const places = str.indexOf(".") > -1 ? str.length - str.indexOf(".") - 1 : 0;
 
+	// If decimal, pad with zeros to match number being added against
+	// Only happens for the shorter number of the two numbers
+	// Only called in add and subtract functions
   if (places > 0) {
     const padding = places !== p ? p - places : 0;
     const multiplyier = Math.pow(10, places + padding);
@@ -90,7 +96,7 @@ function convertToInt(str, p) {
 function removeTrailingZero(str) {
   if (str.indexOf(".") > -1) {
     let countZeros = 0;
-
+		// Count ending zeros after decimal and remove
     for (let i = str.length - 1; i >= 0; i--) {
       if (str.charAt(i) === "0") {
         countZeros++;
@@ -99,11 +105,19 @@ function removeTrailingZero(str) {
       }
     }
     if (countZeros > 0) {
-      return str.substring(0, str.length - countZeros);
+			// Remove trailing zeros from final result
+			const removeZeros = str.substring(0, str.length - countZeros);
+			// If decimal is all that is left, remove that also
+			if(removeZeros.indexOf(".") === removeZeros.length - 1){
+				return removeZeros.substring(0, removeZeros.indexOf("."))
+			}
+      return removeZeros
     } else {
+			// No trailing zeros found
       return str;
     }
   } else {
+		// No decimal in number
     return str;
   }
 }
