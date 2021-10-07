@@ -65,9 +65,20 @@
   color: whitesmoke;
 }
 
+.number:active,
+.decimal:active {
+  background-color:whitesmoke;
+  color: #494848;
+}
+
 .operator {
   background-color: #ff9a00;
   color: whitesmoke;
+}
+
+.operator:active {
+  background-color: whitesmoke;
+  color:#ff9a00;
 }
 
 table {

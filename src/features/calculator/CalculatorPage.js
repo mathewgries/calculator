@@ -7,7 +7,6 @@ import {
   updateFirstValue,
   updateSecondValue,
   updateDisplayValue,
-  clearLast,
   resetAll,
 } from "./calculatorSlice";
 import { DisplayField } from "./DisplayField";
@@ -15,7 +14,6 @@ import { CalculatorButton } from "./CalculatorButton";
 import "./style.css";
 
 // TODO:
-// Handle decimal calculations
 // Handle active button highlighting
 
 export const CalculatorPage = () => {
@@ -75,7 +73,7 @@ export const CalculatorPage = () => {
     } else {
       if (
         displayValue.includes(".") &&
-        displayValue.length - displayValue.indexOf(".") === 3
+        displayValue.length - displayValue.indexOf(".") - 1 === 3
       ) {
         return;
       }

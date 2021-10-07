@@ -27,7 +27,6 @@ const calculatorSlice = createSlice({
     updateDisplayValue(state, action) {
       state.displayValue = action.payload;
     },
-    clearLast(state, action) {},
     resetAll(state) {
       state.queuedOperation = null;
       state.lastAction = null;
@@ -44,7 +43,6 @@ export const {
   updateFirstValue,
   updateSecondValue,
   updateDisplayValue,
-  clearLast,
   resetAll,
 } = calculatorSlice.actions;
 
