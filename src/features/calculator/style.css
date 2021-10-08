@@ -59,6 +59,13 @@
   color: #232b2b;
 }
 
+.clear:active,
+.all-clear:active,
+.sign:active {
+  background-color: #ffffff;
+  color: #232b2b;
+}
+
 .number,
 .decimal {
   background-color: #494848;
@@ -76,7 +83,8 @@
   color: whitesmoke;
 }
 
-.operator:active {
+.active,
+#equal:active {
   background-color: whitesmoke;
   color:#ff9a00;
 }

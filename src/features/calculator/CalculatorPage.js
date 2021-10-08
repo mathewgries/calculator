@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   updateQueuedOperation,
   updateLastAction,
+  updateActiveId,
   updateFirstValue,
   updateSecondValue,
   updateDisplayValue,
@@ -24,6 +25,7 @@ export const CalculatorPage = () => {
     equals: "equals",
   };
   const lastAction = useSelector((state) => state.calculator.lastAction);
+  const activeId = useSelector((state) => state.calculator.activeId);
   const firstValue = useSelector((state) => state.calculator.firstValue);
   const secondValue = useSelector((state) => state.calculator.secondValue);
   const displayValue = useSelector((state) => state.calculator.displayValue);
@@ -83,6 +85,10 @@ export const CalculatorPage = () => {
     if (lastAction !== actionsList.number) {
       dispatch(updateLastAction(actionsList.number));
     }
+
+    if (activeId) {
+      handleActiveId();
+    }
     dispatch(updateDisplayValue(nextValue));
   };
 
@@ -94,6 +100,7 @@ export const CalculatorPage = () => {
         if (queuedOperation === operator) {
           return;
         } else {
+          handleActiveId(operator);
           dispatch(updateQueuedOperation(operator));
           return;
         }
@@ -115,9 +122,11 @@ export const CalculatorPage = () => {
           dispatch(updateDisplayValue(result));
         }
       }
+
       if (queuedOperation !== operator) {
         dispatch(updateQueuedOperation(operator));
       }
+      handleActiveId(operator);
       dispatch(updateLastAction(actionsList.operator));
     }
   };
@@ -139,13 +148,24 @@ export const CalculatorPage = () => {
         dispatch(updateLastAction(actionsList.equals));
       }
 
+      if (activeId) {
+        handleActiveId();
+      }
       dispatch(updateDisplayValue(result));
     }
   };
 
   //==========================================================================//
 
-  const handleSignClick = (sign) => {};
+  const handleSignClick = (sign) => {
+    let result;
+    if (displayValue.indexOf("-") > -1) {
+      result = displayValue.substring(1);
+    } else {
+      result = `-${displayValue}`;
+    }
+    dispatch(updateDisplayValue(result));
+  };
 
   //==========================================================================//
 
@@ -165,6 +185,10 @@ export const CalculatorPage = () => {
       if (lastAction !== actionsList.number) {
         dispatch(updateLastAction(actionsList.number));
       }
+
+      if (activeId) {
+        handleActiveId();
+      }
     }
   };
 
@@ -179,11 +203,25 @@ export const CalculatorPage = () => {
   //==========================================================================//
 
   const handleAllClearClick = () => {
-    if (lastAction) {
+    if (lastAction || displayValue !== "0") {
+      handleActiveId();
       dispatch(resetAll());
     }
   };
 
+  //==========================================================================//
+
+  const handleActiveId = (id) => {
+    if (activeId) {
+      document.getElementById(activeId).classList.remove("active");
+    }
+    if (id) {
+      document.getElementById(id).classList.add("active");
+      dispatch(updateActiveId(id));
+    } else if (activeId && !id) {
+      dispatch(updateActiveId(null));
+    }
+  };
   //==========================================================================//
 
   return (
@@ -202,6 +240,7 @@ export const CalculatorPage = () => {
                 id={"all-clear"}
                 className={"all-clear"}
                 onClickHandler={onClickHandler}
+                isActive
               />
             </td>
             <td>

@@ -3,6 +3,7 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialState = {
   queuedOperation: null,
   lastAction: null,
+  activeId: null,
   firstValue: "0",
   secondValue: "0",
   displayValue: "0",
@@ -18,6 +19,9 @@ const calculatorSlice = createSlice({
     updateLastAction(state, action) {
       state.lastAction = action.payload;
     },
+    updateActiveId(state, action) {
+      state.activeId = action.payload;
+    },
     updateFirstValue(state, action) {
       state.firstValue = action.payload;
     },
@@ -30,6 +34,7 @@ const calculatorSlice = createSlice({
     resetAll(state) {
       state.queuedOperation = null;
       state.lastAction = null;
+      state.activeId = null;
       state.firstValue = "0";
       state.secondValue = "0";
       state.displayValue = "0";
@@ -40,6 +45,7 @@ const calculatorSlice = createSlice({
 export const {
   updateQueuedOperation,
   updateLastAction,
+  updateActiveId,
   updateFirstValue,
   updateSecondValue,
   updateDisplayValue,
